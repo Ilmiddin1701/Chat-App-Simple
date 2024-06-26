@@ -1,0 +1,5 @@
+<resources>
+    <style name="Base.Theme.ChatApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">#1C1D1F</item>
+    </style>
+</resources>
