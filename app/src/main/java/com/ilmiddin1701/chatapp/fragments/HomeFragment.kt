@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -28,10 +29,11 @@ import com.ilmiddin1701.chatapp.models.Users
 import com.ilmiddin1701.chatapp.utils.obj
 import com.ilmiddin1701.chatapp.utils.obj.firebaseDatabase
 import com.squareup.picasso.Picasso
+import kotlin.math.sign
 
 private const val TAG = "HomeFragment"
 @Suppress("DEPRECATION")
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), UsersAdapter.RvAction {
     private val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
 
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -44,9 +46,6 @@ class HomeFragment : Fragment() {
     ): View {
         requireActivity().window.statusBarColor = Color.parseColor("#1C1D1F")
         binding.apply {
-            binding.root.setOnClickListener {
-                findNavController().navigate(R.id.chatFragment)
-            }
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -57,6 +56,7 @@ class HomeFragment : Fragment() {
             binding.btnUser.setOnClickListener {
                 signIn()
             }
+            Picasso.get().load(auth.currentUser?.photoUrl).into(binding.btnUser)
             obj.reference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     list = ArrayList()
@@ -65,7 +65,7 @@ class HomeFragment : Fragment() {
                         val user = child.getValue(Users::class.java)
                         list.add(user!!)
                     }
-                    rv.adapter = UsersAdapter(list)
+                    rv.adapter = UsersAdapter(this@HomeFragment, list)
                 }
                 override fun onCancelled(error: DatabaseError) {
                     Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
@@ -87,7 +87,6 @@ class HomeFragment : Fragment() {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             try {
                 val account = task.getResult(ApiException::class.java)!!
-                Log.d(TAG, "firebaseAuthWithGoogle:" + account.id)
                 firebaseAuthWithGoogle(account.idToken!!)
             } catch (e: ApiException) {
                 Log.w(TAG, "Google sign in failed", e)
@@ -100,16 +99,17 @@ class HomeFragment : Fragment() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
-                    Log.d(TAG, "signInWithCredential:success")
                     val user = auth.currentUser
                     Picasso.get().load(user?.photoUrl).into(binding.btnUser)
                     val users = Users(user?.displayName.toString(), user?.uid.toString(), user?.photoUrl.toString())
                     obj.reference.child(user?.uid!!).setValue(users)
-                    Toast.makeText(context, user.email, Toast.LENGTH_SHORT).show()
                 } else {
-                    Log.w(TAG, "signInWithCredential:failure", task.exception)
                     Toast.makeText(context, "${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+    }
+
+    override fun onClick(users: Users, position: Int) {
+        findNavController().navigate(R.id.chatFragment, bundleOf("keyUser" to users, "keyUserPosition" to position))
     }
 }
