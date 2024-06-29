@@ -1,10 +1,10 @@
 package com.ilmiddin1701.chatapp.fragments
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.view.ContextMenu
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -14,9 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -26,19 +24,15 @@ import com.ilmiddin1701.chatapp.R
 import com.ilmiddin1701.chatapp.adapters.UsersAdapter
 import com.ilmiddin1701.chatapp.databinding.FragmentHomeBinding
 import com.ilmiddin1701.chatapp.models.Users
-import com.ilmiddin1701.chatapp.utils.obj
-import com.ilmiddin1701.chatapp.utils.obj.firebaseDatabase
+import com.ilmiddin1701.chatapp.utils.MyObject
 import com.squareup.picasso.Picasso
-import kotlin.math.sign
 
-private const val TAG = "HomeFragment"
-@Suppress("DEPRECATION")
 class HomeFragment : Fragment(), UsersAdapter.RvAction {
     private val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
 
     private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var auth: FirebaseAuth
     private lateinit var list: ArrayList<Users>
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,17 +47,19 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
             googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
             auth = FirebaseAuth.getInstance()
-            binding.btnUser.setOnClickListener {
-                signIn()
-            }
+
+            registerForContextMenu(btnUser)
+
             Picasso.get().load(auth.currentUser?.photoUrl).into(binding.btnUser)
-            obj.reference.addValueEventListener(object : ValueEventListener {
+            MyObject.reference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     list = ArrayList()
                     val children = snapshot.children
                     for (child in children) {
                         val user = child.getValue(Users::class.java)
-                        list.add(user!!)
+                        if (user?.uid != auth.uid) {
+                            list.add(user!!)
+                        }
                     }
                     rv.adapter = UsersAdapter(this@HomeFragment, list)
                 }
@@ -75,41 +71,28 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
         return binding.root
     }
 
-    private fun signIn() {
-        val signInIntent = googleSignInClient.signInIntent
-        startActivityForResult(signInIntent, 1)
+    override fun onCreateContextMenu(
+        menu: ContextMenu,
+        v: View,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        requireActivity().menuInflater.inflate(R.menu.my_menu, menu)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                Log.w(TAG, "Google sign in failed", e)
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_logOut -> {
+                googleSignInClient.signOut()
+                auth.signOut()
+                findNavController().popBackStack()
+                findNavController().navigate(R.id.signInFragment)
             }
         }
+        return super.onContextItemSelected(item)
     }
 
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(requireActivity()) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    Picasso.get().load(user?.photoUrl).into(binding.btnUser)
-                    val users = Users(user?.displayName.toString(), user?.uid.toString(), user?.photoUrl.toString())
-                    obj.reference.child(user?.uid!!).setValue(users)
-                } else {
-                    Toast.makeText(context, "${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
-
-    override fun onClick(users: Users, position: Int) {
-        findNavController().navigate(R.id.chatFragment, bundleOf("keyUser" to users, "keyUserPosition" to position))
+    override fun onClick(users: Users) {
+        findNavController().navigate(R.id.chatFragment, bundleOf("keyUserUID" to users.uid))
     }
 }

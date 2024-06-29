@@ -11,11 +11,11 @@ import com.squareup.picasso.Picasso
 class UsersAdapter (var rvAction: RvAction,var list: ArrayList<Users>): Adapter<UsersAdapter.Vh>(){
 
     inner class Vh(var itemRvBinding: ItemRv1Binding): RecyclerView.ViewHolder(itemRvBinding.root){
-        fun onBind(users: Users, position: Int){
+        fun onBind(users: Users){
             itemRvBinding.userName.text = users.name
             Picasso.get().load(users.photoUrl).into(itemRvBinding.userImage)
             itemRvBinding.root.setOnClickListener {
-                rvAction.onClick(users, position)
+                rvAction.onClick(users)
             }
         }
     }
@@ -27,10 +27,10 @@ class UsersAdapter (var rvAction: RvAction,var list: ArrayList<Users>): Adapter<
     override fun getItemCount(): Int = list.size
 
     override fun onBindViewHolder(holder: Vh, position: Int) {
-        holder.onBind(list[position], position)
+        holder.onBind(list[position])
     }
 
     interface RvAction{
-        fun onClick(users: Users, position: Int)
+        fun onClick(users: Users)
     }
 }

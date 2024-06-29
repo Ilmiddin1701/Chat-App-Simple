@@ -56,10 +56,12 @@
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:stackFromEnd="true"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@id/scrollView"
         app:layout_constraintTop_toBottomOf="@id/title"
-        tools:listitem="@layout/item_rv_2" />
+        tools:listitem="@layout/message_item_send"
+        tools:ignore="NotSibling" />
 
     <ScrollView
         android:id="@+id/scrollView"
