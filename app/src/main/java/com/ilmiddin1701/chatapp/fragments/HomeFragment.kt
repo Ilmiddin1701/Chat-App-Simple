@@ -24,21 +24,27 @@ import com.ilmiddin1701.chatapp.R
 import com.ilmiddin1701.chatapp.adapters.UsersAdapter
 import com.ilmiddin1701.chatapp.databinding.FragmentHomeBinding
 import com.ilmiddin1701.chatapp.models.Users
-import com.ilmiddin1701.chatapp.utils.MyObject
 import com.squareup.picasso.Picasso
 
 class HomeFragment : Fragment(), UsersAdapter.RvAction {
     private val binding by lazy { FragmentHomeBinding.inflate(layoutInflater) }
 
-    private lateinit var googleSignInClient: GoogleSignInClient
-    private lateinit var list: ArrayList<Users>
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var reference: DatabaseReference
+
     private lateinit var auth: FirebaseAuth
+    private lateinit var list: ArrayList<Users>
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         requireActivity().window.statusBarColor = Color.parseColor("#1C1D1F")
+
+        firebaseDatabase = FirebaseDatabase.getInstance()
+        reference = firebaseDatabase.getReference("users")
+
         binding.apply {
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -51,7 +57,7 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
             registerForContextMenu(btnUser)
 
             Picasso.get().load(auth.currentUser?.photoUrl).into(binding.btnUser)
-            MyObject.reference.addValueEventListener(object : ValueEventListener {
+            reference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     list = ArrayList()
                     val children = snapshot.children
@@ -63,6 +69,7 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
                     }
                     rv.adapter = UsersAdapter(this@HomeFragment, list)
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
                 }
@@ -93,6 +100,9 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
     }
 
     override fun onClick(users: Users) {
-        findNavController().navigate(R.id.chatFragment, bundleOf("keyUserUID" to users.uid))
+        findNavController().navigate(
+            R.id.chatFragment,
+            bundleOf("keyUser" to users, "currentUserUID" to auth.uid.toString(), "currentUserPhotoUrl" to auth.currentUser?.photoUrl.toString())
+        )
     }
 }

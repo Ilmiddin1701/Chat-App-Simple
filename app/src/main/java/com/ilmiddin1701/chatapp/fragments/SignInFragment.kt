@@ -21,21 +21,26 @@ import com.google.firebase.database.FirebaseDatabase
 import com.ilmiddin1701.chatapp.R
 import com.ilmiddin1701.chatapp.databinding.FragmentSignInBinding
 import com.ilmiddin1701.chatapp.models.Users
-import com.ilmiddin1701.chatapp.utils.MyObject
-import com.squareup.picasso.Picasso
 
 private const val TAG = "SignInFragment"
 class SignInFragment : Fragment() {
     private val binding by lazy { FragmentSignInBinding.inflate(layoutInflater) }
 
-    private lateinit var googleSignInClient: GoogleSignInClient
+    private lateinit var firebaseDatabase: FirebaseDatabase
+    private lateinit var reference: DatabaseReference
+
     private lateinit var auth: FirebaseAuth
+    private lateinit var googleSignInClient: GoogleSignInClient
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         requireActivity().window.statusBarColor = Color.parseColor("#0C1319")
+
+        firebaseDatabase = FirebaseDatabase.getInstance()
+        reference = firebaseDatabase.getReference("users")
+
         auth = FirebaseAuth.getInstance()
         if (auth.currentUser != null) {
             findNavController().popBackStack()
@@ -81,7 +86,7 @@ class SignInFragment : Fragment() {
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     val users = Users(user?.displayName.toString(), user?.uid.toString(), user?.photoUrl.toString())
-                    MyObject.reference.child(user?.uid!!).setValue(users)
+                    reference.child(user?.uid!!).setValue(users)
                     findNavController().popBackStack()
                     findNavController().navigate(R.id.homeFragment)
                 } else {

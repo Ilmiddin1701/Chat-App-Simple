@@ -56,12 +56,13 @@
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:stackFromEnd="true"
+        android:paddingVertical="10dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@id/scrollView"
         app:layout_constraintTop_toBottomOf="@id/title"
-        tools:listitem="@layout/message_item_send"
-        tools:ignore="NotSibling" />
+        app:stackFromEnd="true"
+        tools:ignore="NotSibling"
+        tools:listitem="@layout/message_item_send" />
 
     <ScrollView
         android:id="@+id/scrollView"
@@ -75,6 +76,7 @@
         app:layout_constraintVertical_bias="1">
 
         <EditText
+            android:id="@+id/edtMessage"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
