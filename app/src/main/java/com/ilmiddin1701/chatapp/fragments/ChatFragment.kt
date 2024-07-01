@@ -58,7 +58,7 @@ class ChatFragment : Fragment() {
         binding.apply {
             btnSend.setOnClickListener {
                 val text = edtMessage.text.toString()
-                if (text.isNotEmpty()) {
+                if (text.isNotBlank()) {
                     val message = MyMessage(text, userDetails.uid, currentUserUID, getDate())
                     val key = reference.push().key
                     reference.child(userDetails.uid ?: "").child("messages").child(currentUserUID)
