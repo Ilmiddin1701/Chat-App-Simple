@@ -1,6 +1,7 @@
 package com.ilmiddin1701.chatapp.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ilmiddin1701.chatapp.databinding.MessageItemReceivedBinding
@@ -11,11 +12,21 @@ import com.squareup.picasso.Picasso
 class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     val TYPE_FROM = 1
     val TYPE_TO = 0
+
     inner class ToVh(var receivedItem: MessageItemReceivedBinding): RecyclerView.ViewHolder(receivedItem.root){
         fun onBind(message: MyMessage){
             receivedItem.tvSms.text = message.text
             receivedItem.tvDate.text = message.date
-            Picasso.get().load(message.toUserPhotoUrl).into(receivedItem.userImage)
+            var isClick = false
+            receivedItem.tvSms.setOnClickListener {
+                if (!isClick){
+                    isClick = true
+                    receivedItem.tvDate.visibility = View.VISIBLE
+                }else{
+                    isClick = false
+                    receivedItem.tvDate.visibility = View.GONE
+                }
+            }
         }
     }
 
@@ -23,7 +34,16 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
         fun onBind(message: MyMessage){
             sendItem.tvSms.text = message.text
             sendItem.tvDate.text = message.date
-            Picasso.get().load(message.fromUserPhotoUrl).into(sendItem.userImage)
+            var isClick = false
+            sendItem.tvSms.setOnClickListener {
+                if (!isClick){
+                    isClick = true
+                    sendItem.tvDate.visibility = View.VISIBLE
+                }else{
+                    isClick = false
+                    sendItem.tvDate.visibility = View.GONE
+                }
+            }
         }
     }
 

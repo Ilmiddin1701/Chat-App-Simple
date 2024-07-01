@@ -31,6 +31,7 @@ class ChatFragment : Fragment() {
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var reference: DatabaseReference
 
+    private lateinit var currentUserUID: String
     private lateinit var list: ArrayList<MyMessage>
     private lateinit var messageAdapter: MessageAdapter
 
@@ -41,23 +42,39 @@ class ChatFragment : Fragment() {
         requireActivity().window.statusBarColor = Color.parseColor("#1B2026")
         val media = MediaPlayer.create(context, R.raw.sound_send)
 
-        val currentUserUID = arguments?.getString("currentUserUID")
-        val currentUserPhotoUrl = arguments?.getString("currentUserPhotoUrl")
-        val userDetails = arguments?.getSerializable("keyUser") as Users
         list = ArrayList()
+        currentUserUID = arguments?.getString("currentUserUID").toString()
+        val userDetails = arguments?.getSerializable("keyUser") as Users
 
         firebaseDatabase = FirebaseDatabase.getInstance()
         reference = firebaseDatabase.getReference("users")
 
         binding.title.text = userDetails.name
-        Picasso.get().load(userDetails.photoUrl).into(binding.userImage)
+        val toUserPhotoUrl = userDetails.photoUrl
+        Picasso.get().load(toUserPhotoUrl).into(binding.userImage)
         messageAdapter = MessageAdapter(list, currentUserUID ?: "")
         binding.rv.adapter = messageAdapter
 
-
-
         binding.apply {
-            reference.addValueEventListener(object : ValueEventListener {
+            btnSend.setOnClickListener {
+                val text = edtMessage.text.toString()
+                if (text.isNotEmpty()) {
+                    val message = MyMessage(text, userDetails.uid, currentUserUID, getDate())
+                    val key = reference.push().key
+                    reference.child(userDetails.uid ?: "").child("messages").child(currentUserUID)
+                        .child(key ?: "").setValue(message)
+
+                    reference.child(currentUserUID).child("messages").child(userDetails.uid ?: "")
+                        .child(key ?: "").setValue(message)
+
+                    media.start()
+                    binding.edtMessage.text.clear()
+                }
+            }
+
+            reference.child(currentUserUID).child("messages").child(userDetails.uid ?: "")
+                .addValueEventListener(object : ValueEventListener {
+
                 @SuppressLint("NotifyDataSetChanged")
                 override fun onDataChange(snapshot: DataSnapshot) {
                     list.clear()
@@ -68,7 +85,7 @@ class ChatFragment : Fragment() {
                             list.add(message)
                         }
                     }
-                    messageAdapter.notifyDataSetChanged()
+                    messageAdapter.notifyItemInserted(list.size - 1)
                     binding.rv.scrollToPosition(list.size - 1)
                 }
 
@@ -76,22 +93,6 @@ class ChatFragment : Fragment() {
                     Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
                 }
             })
-
-            btnSend.setOnClickListener {
-                val text = edtMessage.text.toString()
-                if (text.isNotEmpty()) {
-                    val message = MyMessage(text, userDetails.uid, userDetails.photoUrl, currentUserUID, currentUserPhotoUrl, getDate())
-                    val key = reference.push().key
-                    reference.child(userDetails.uid ?: "").child("messages").child(currentUserUID ?: "")
-                        .child(key ?: "").setValue(message)
-
-                    reference.child(currentUserUID ?: "").child("messages").child(userDetails.uid ?: "")
-                        .child(key ?: "").setValue(message)
-
-                    media.start()
-                    binding.edtMessage.text.clear()
-                }
-            }
 
             btnBack.setOnClickListener {
                 findNavController().popBackStack()
@@ -102,7 +103,7 @@ class ChatFragment : Fragment() {
 
     private fun getDate(): String {
         val date = Date()
-        val simpleDateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm")
+        val simpleDateFormat = SimpleDateFormat("HH:mm\ndd.MM.yyyy")
         return simpleDateFormat.format(date)
     }
 }
