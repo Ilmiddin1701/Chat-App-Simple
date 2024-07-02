@@ -85,7 +85,7 @@ class SignInFragment : Fragment() {
             .addOnCompleteListener(requireActivity()) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
-                    val users = Users(user?.displayName, user?.email, user?.uid, user?.photoUrl.toString())
+                    val users = Users(user?.displayName.toString(), user?.email.toString(), user?.uid.toString(), user?.photoUrl.toString())
                     reference.child(user?.uid!!).setValue(users)
                     findNavController().popBackStack()
                     findNavController().navigate(R.id.homeFragment)

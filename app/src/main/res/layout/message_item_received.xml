@@ -20,9 +20,9 @@
             android:id="@+id/card"
             android:layout_width="190dp"
             android:layout_height="280dp"
-            android:layout_margin="2dp"
             android:background="@android:color/transparent"
             android:backgroundTint="@android:color/transparent"
+            android:layout_margin="2dp"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp">
 
@@ -39,7 +39,6 @@
             style="@style/text_style_received"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:autoSizeMaxTextSize="18sp"
             android:text="@string/sms"
             tools:ignore="UnusedAttribute" />
     </LinearLayout>

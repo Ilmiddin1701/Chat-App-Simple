@@ -116,6 +116,7 @@ class ChatFragment : Fragment() {
                         .child(key).setValue(message)
 
                     media.start()
+                    binding.edtMessage.text.clear()
 
                 } else if (uri != null && text.isBlank()) {
                     val m = System.currentTimeMillis()

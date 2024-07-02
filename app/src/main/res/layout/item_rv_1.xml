@@ -33,15 +33,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="16sp"
+            android:textSize="20sp"
             android:text="User name"/>
 
         <TextView
             android:id="@+id/email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="16sp"/>
+            android:textColor="#C1C1C1"
+            android:textSize="15sp"/>
 
     </LinearLayout>
 </LinearLayout>

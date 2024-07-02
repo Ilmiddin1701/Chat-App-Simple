@@ -32,7 +32,7 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
                 receivedItem.tvSms.text = message.text
                 Picasso.get().load(message.image).into(receivedItem.image)
             }
-            receivedItem.linear.setOnClickListener {
+            receivedItem.root.setOnClickListener {
                 if (!isClick){
                     isClick = true
                     receivedItem.tvDate.visibility = View.VISIBLE
@@ -63,7 +63,7 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
                 sendItem.tvSms.text = message.text
                 Picasso.get().load(message.image).into(sendItem.image)
             }
-            sendItem.linear.setOnClickListener {
+            sendItem.root.setOnClickListener {
                 if (!isClick){
                     isClick = true
                     sendItem.tvDate.visibility = View.VISIBLE
