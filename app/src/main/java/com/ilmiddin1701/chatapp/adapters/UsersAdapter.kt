@@ -13,6 +13,7 @@ class UsersAdapter (var rvAction: RvAction,var list: ArrayList<Users>): Adapter<
     inner class Vh(var itemRvBinding: ItemRv1Binding): RecyclerView.ViewHolder(itemRvBinding.root){
         fun onBind(users: Users){
             itemRvBinding.userName.text = users.name
+            itemRvBinding.email.text = users.email
             Picasso.get().load(users.photoUrl).into(itemRvBinding.userImage)
             itemRvBinding.root.setOnClickListener {
                 rvAction.onClick(users)
