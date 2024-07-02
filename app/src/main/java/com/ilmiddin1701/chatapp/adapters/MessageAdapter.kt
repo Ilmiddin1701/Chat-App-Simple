@@ -17,18 +17,19 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
         fun onBind(message: MyMessage){
             receivedItem.tvDate.text = message.date
             var isClick = false
-            if (message.image != null && message.text!!.isNotBlank()) {
+            if (message.image != null && message.text != "") {
                 receivedItem.card.visibility = View.VISIBLE
                 receivedItem.tvSms.visibility = View.VISIBLE
                 receivedItem.tvSms.text = message.text
                 Picasso.get().load(message.image).into(receivedItem.image)
-            }else if (message.image != null && message.text == ""){
+            }else if (message.image != null && message.text!!.isBlank()){
                 receivedItem.card.visibility = View.VISIBLE
                 receivedItem.tvSms.visibility = View.GONE
                 Picasso.get().load(message.image).into(receivedItem.image)
-            } else if (message.image == null && message.text!!.isNotBlank()){
+            } else if (message.image == null && message.text != ""){
                 receivedItem.card.visibility = View.GONE
                 receivedItem.tvSms.visibility = View.VISIBLE
+                receivedItem.tvSms.text = message.text
                 Picasso.get().load(message.image).into(receivedItem.image)
             }
             receivedItem.linear.setOnClickListener {
@@ -47,18 +48,19 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
         fun onBind(message: MyMessage){
             sendItem.tvDate.text = message.date
             var isClick = false
-            if (message.image != null && message.text!!.isNotBlank()) {
+            if (message.image != null && message.text != "") {
                 sendItem.card.visibility = View.VISIBLE
                 sendItem.tvSms.visibility = View.VISIBLE
                 sendItem.tvSms.text = message.text
                 Picasso.get().load(message.image).into(sendItem.image)
-            }else if (message.image != null && message.text == ""){
+            }else if (message.image != null && message.text!!.isBlank()){
                 sendItem.card.visibility = View.VISIBLE
                 sendItem.tvSms.visibility = View.GONE
                 Picasso.get().load(message.image).into(sendItem.image)
-            } else if (message.image == null && message.text!!.isNotBlank()){
+            } else if (message.image == null && message.text != ""){
                 sendItem.card.visibility = View.GONE
                 sendItem.tvSms.visibility = View.VISIBLE
+                sendItem.tvSms.text = message.text
                 Picasso.get().load(message.image).into(sendItem.image)
             }
             sendItem.linear.setOnClickListener {
