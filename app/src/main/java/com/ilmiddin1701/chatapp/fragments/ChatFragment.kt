@@ -3,11 +3,14 @@ package com.ilmiddin1701.chatapp.fragments
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.firebase.auth.FirebaseAuth
@@ -16,6 +19,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import com.ilmiddin1701.chatapp.R
 import com.ilmiddin1701.chatapp.adapters.MessageAdapter
 import com.ilmiddin1701.chatapp.databinding.FragmentChatBinding
@@ -30,6 +35,9 @@ class ChatFragment : Fragment() {
 
     private lateinit var firebaseDatabase: FirebaseDatabase
     private lateinit var reference: DatabaseReference
+
+    private lateinit var firebaseStorage: FirebaseStorage
+    private lateinit var storageReference: StorageReference
 
     private lateinit var currentUserUID: String
     private lateinit var list: ArrayList<MyMessage>
@@ -49,27 +57,112 @@ class ChatFragment : Fragment() {
         firebaseDatabase = FirebaseDatabase.getInstance()
         reference = firebaseDatabase.getReference("users")
 
+        firebaseStorage = FirebaseStorage.getInstance()
+        storageReference = firebaseStorage.getReference("images")
+
         binding.title.text = userDetails.name
         val toUserPhotoUrl = userDetails.photoUrl
         Picasso.get().load(toUserPhotoUrl).into(binding.userImage)
-        messageAdapter = MessageAdapter(list, currentUserUID ?: "")
+        messageAdapter = MessageAdapter(list, currentUserUID)
         binding.rv.adapter = messageAdapter
 
         binding.apply {
             btnSend.setOnClickListener {
                 val text = edtMessage.text.toString()
-                if (text.isNotBlank()) {
-                    val message = MyMessage(text, userDetails.uid, currentUserUID, getDate())
-                    val key = reference.push().key
-                    reference.child(userDetails.uid ?: "").child("messages").child(currentUserUID)
-                        .child(key ?: "").setValue(message)
+                if (uri != null && text.isNotBlank()) {
+                    val m = System.currentTimeMillis()
+                    val task = storageReference.child(m.toString()).putFile(uri!!)
+                    btnX.isEnabled = false
+                    btnSend.isEnabled = false
+                    edtMessage.isEnabled = false
+                    progress.visibility = View.VISIBLE
 
-                    reference.child(currentUserUID).child("messages").child(userDetails.uid ?: "")
-                        .child(key ?: "").setValue(message)
+                    task.addOnSuccessListener {
+                        if (it.task.isSuccessful) {
+                            val downloadURL = it.metadata?.reference?.downloadUrl
+                            downloadURL?.addOnSuccessListener { imageURL ->
+                                imgURL = imageURL.toString()
+                                val message = MyMessage(text, userDetails.uid, currentUserUID, imgURL, getDate())
+                                val key = reference.push().key!!
+
+                                reference.child(userDetails.uid!!).child("messages").child(currentUserUID)
+                                    .child(key).setValue(message)
+
+                                reference.child(currentUserUID).child("messages").child(userDetails.uid!!)
+                                    .child(key).setValue(message)
+
+                                uri = null
+                                media.start()
+                                btnX.isEnabled = true
+                                btnSend.isEnabled = true
+                                edtMessage.isEnabled = true
+                                binding.edtMessage.text.clear()
+                                progress.visibility = View.GONE
+                                sendImageLayout.visibility = View.GONE
+                            }
+                        }
+                    }
+                    task.addOnFailureListener {
+                        Toast.makeText(context, "Error " + it.message, Toast.LENGTH_SHORT).show()
+                    }
+                } else if (uri == null && text.isNotBlank()) {
+                    val message = MyMessage(text, userDetails.uid, currentUserUID, getDate())
+                    val key = reference.push().key!!
+
+                    reference.child(userDetails.uid!!).child("messages").child(currentUserUID)
+                        .child(key).setValue(message)
+
+                    reference.child(currentUserUID).child("messages").child(userDetails.uid!!)
+                        .child(key).setValue(message)
 
                     media.start()
-                    binding.edtMessage.text.clear()
+
+                } else if (uri != null && text.isBlank()) {
+                    val m = System.currentTimeMillis()
+                    val task = storageReference.child(m.toString()).putFile(uri!!)
+                    btnX.isEnabled = false
+                    btnSend.isEnabled = false
+                    edtMessage.isEnabled = false
+                    progress.visibility = View.VISIBLE
+
+                    task.addOnSuccessListener {
+                        if (it.task.isSuccessful) {
+                            val downloadURL = it.metadata?.reference?.downloadUrl
+                            downloadURL?.addOnSuccessListener { imageURL ->
+                                imgURL = imageURL.toString()
+                                val message = MyMessage("", userDetails.uid, currentUserUID, imgURL, getDate())
+                                val key = reference.push().key!!
+
+                                reference.child(userDetails.uid!!).child("messages").child(currentUserUID)
+                                    .child(key).setValue(message)
+
+                                reference.child(currentUserUID).child("messages").child(userDetails.uid!!)
+                                    .child(key).setValue(message)
+
+                                uri = null
+                                media.start()
+                                btnX.isEnabled = true
+                                btnSend.isEnabled = true
+                                edtMessage.isEnabled = true
+                                binding.edtMessage.text.clear()
+                                progress.visibility = View.GONE
+                                sendImageLayout.visibility = View.GONE
+                            }
+                        }
+                    }
+                    task.addOnFailureListener {
+                        Toast.makeText(context, "Error " + it.message, Toast.LENGTH_SHORT).show()
+                    }
                 }
+            }
+
+            btnAttach.setOnClickListener {
+                getImageContent.launch("image/*")
+            }
+
+            btnX.setOnClickListener {
+                uri = null
+                sendImageLayout.visibility = View.GONE
             }
 
             reference.child(currentUserUID).child("messages").child(userDetails.uid ?: "")
@@ -85,7 +178,7 @@ class ChatFragment : Fragment() {
                             list.add(message)
                         }
                     }
-                    messageAdapter.notifyItemInserted(list.size - 1)
+                    messageAdapter.notifyDataSetChanged()
                     binding.rv.scrollToPosition(list.size - 1)
                 }
 
@@ -105,5 +198,15 @@ class ChatFragment : Fragment() {
         val date = Date()
         val simpleDateFormat = SimpleDateFormat("HH:mm\ndd.MM.yyyy")
         return simpleDateFormat.format(date)
+    }
+
+    var imgURL = ""
+    var uri: Uri? = null
+    private val getImageContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        it ?: return@registerForActivityResult
+        uri = it
+
+        binding.sendImageLayout.visibility = View.VISIBLE
+        binding.sendImage.setImageURI(it)
     }
 }

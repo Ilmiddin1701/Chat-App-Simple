@@ -56,22 +56,77 @@
         android:id="@+id/rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:paddingVertical="5dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-       android:layout_weight="1"
         app:stackFromEnd="true"
         tools:ignore="NotSibling"
         tools:listitem="@layout/message_item_send" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.cardview.widget.CardView
+        android:id="@+id/sendImageLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:backgroundTint="#293036"
+        android:visibility="gone"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/sendImage"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_margin="8dp"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/ic_launcher" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                android:layout_width="match_parent"
+                android:layout_height="61dp"
+                android:background="#80000000"
+                android:indeterminateTint="@color/blue"
+                android:padding="12dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/btnX"
+                android:layout_width="30dp"
+                android:layout_height="35dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="10dp"
+                android:gravity="center"
+                android:text="@string/x"
+                android:textColor="@color/white"
+                android:textSize="25sp" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#293036"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/btnAttach"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:padding="8dp"
+            android:src="@drawable/ic_attach_file" />
 
         <ScrollView
             android:id="@+id/scrollView"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="#293036"
+            android:layout_weight="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/btnSend"
@@ -86,9 +141,9 @@
                 android:hint="@string/matnli_xabar"
                 android:lineHeight="24dp"
                 android:maxLines="4"
-                android:paddingStart="13dp"
+                android:paddingStart="0dp"
                 android:paddingTop="13dp"
-                android:paddingEnd="55dp"
+                android:paddingEnd="10dp"
                 android:paddingBottom="13dp"
                 android:textColor="@color/white"
                 android:textColorHint="#C5CCD2"
@@ -100,13 +155,14 @@
             android:id="@+id/btnSend"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_gravity="bottom"
             android:padding="10dp"
-            android:src="@drawable/ic_send"
+            android:src="@drawable/baseline_send_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="1"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="1" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 </LinearLayout>

@@ -17,12 +17,12 @@
         android:orientation="vertical">
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/card"
             android:layout_width="190dp"
-            android:layout_height="270dp"
-            android:layout_margin="4dp"
+            android:layout_height="280dp"
+            android:layout_margin="2dp"
             android:background="@android:color/transparent"
             android:backgroundTint="@android:color/transparent"
-            android:visibility="gone"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp">
 
