@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.ilmiddin1701.chatapp"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,4 +60,14 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
     //noinspection GradleDependency,UseTomlInstead
     implementation("com.google.android.gms:play-services-auth:19.2.0")
+
+    //Save photo implementation
+    //noinspection UseTomlInstead
+    implementation ("com.google.zxing:core:3.4.1")
+    //noinspection UseTomlInstead
+    implementation ("com.journeyapps:zxing-android-embedded:4.2.0")
+
+
+    //noinspection UseTomlInstead
+    implementation("com.google.code.gson:gson:2.10.1")
 }

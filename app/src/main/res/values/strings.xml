@@ -3,10 +3,13 @@
     <string name="default_web_client_id">YOUR_CLIENT_ID_HERE</string>
     <string name="matnli_xabar">Matnli xabar</string>
     <string name="chat_boshlash">Chat boshlash</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="chiqish">Chiqish</string>
     <string name="date">date</string>
     <string name="sms">SMS</string>
     <string name="x">×</string>
+    <string name="qidirish">Qidirish</string>
+    <string name="btn_back">btnBack</string>
+    <string name="user_name">User name</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

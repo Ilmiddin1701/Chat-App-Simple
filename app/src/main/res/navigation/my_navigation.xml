@@ -20,4 +20,14 @@
         android:name="com.ilmiddin1701.chatapp.fragments.SignInFragment"
         android:label="fragment_sign_in"
         tools:layout="@layout/fragment_sign_in" />
+    <fragment
+        android:id="@+id/imageViewFragment"
+        android:name="com.ilmiddin1701.chatapp.fragments.ImageViewFragment"
+        android:label="fragment_image_view"
+        tools:layout="@layout/fragment_image_view" />
+    <fragment
+        android:id="@+id/createNewChatFragment"
+        android:name="com.ilmiddin1701.chatapp.fragments.CreateNewChatFragment"
+        android:label="fragment_create_new_chat"
+        tools:layout="@layout/fragment_create_new_chat" />
 </navigation>

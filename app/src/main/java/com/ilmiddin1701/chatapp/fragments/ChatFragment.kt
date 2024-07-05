@@ -5,15 +5,15 @@ import android.graphics.Color
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -26,11 +26,12 @@ import com.ilmiddin1701.chatapp.adapters.MessageAdapter
 import com.ilmiddin1701.chatapp.databinding.FragmentChatBinding
 import com.ilmiddin1701.chatapp.models.MyMessage
 import com.ilmiddin1701.chatapp.models.Users
+import com.ilmiddin1701.chatapp.utils.MySharedPreferences
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class ChatFragment : Fragment() {
+class ChatFragment : Fragment(), MessageAdapter.RvAction {
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
 
     private lateinit var firebaseDatabase: FirebaseDatabase
@@ -63,7 +64,7 @@ class ChatFragment : Fragment() {
         binding.title.text = userDetails.name
         val toUserPhotoUrl = userDetails.photoUrl
         Picasso.get().load(toUserPhotoUrl).into(binding.userImage)
-        messageAdapter = MessageAdapter(list, currentUserUID)
+        messageAdapter = MessageAdapter(this, list, currentUserUID)
         binding.rv.adapter = messageAdapter
 
         binding.apply {
@@ -85,10 +86,12 @@ class ChatFragment : Fragment() {
                                 val message = MyMessage(text, userDetails.uid, currentUserUID, imgURL, getDate())
                                 val key = reference.push().key!!
 
-                                reference.child(userDetails.uid!!).child("messages").child(currentUserUID)
+                                reference.child(userDetails.uid!!).child("messages")
+                                    .child(currentUserUID)
                                     .child(key).setValue(message)
 
-                                reference.child(currentUserUID).child("messages").child(userDetails.uid!!)
+                                reference.child(currentUserUID).child("messages")
+                                    .child(userDetails.uid!!)
                                     .child(key).setValue(message)
 
                                 uri = null
@@ -134,10 +137,12 @@ class ChatFragment : Fragment() {
                                 val message = MyMessage("", userDetails.uid, currentUserUID, imgURL, getDate())
                                 val key = reference.push().key!!
 
-                                reference.child(userDetails.uid!!).child("messages").child(currentUserUID)
+                                reference.child(userDetails.uid!!).child("messages")
+                                    .child(currentUserUID)
                                     .child(key).setValue(message)
 
-                                reference.child(currentUserUID).child("messages").child(userDetails.uid!!)
+                                reference.child(currentUserUID).child("messages")
+                                    .child(userDetails.uid!!)
                                     .child(key).setValue(message)
 
                                 uri = null
@@ -169,24 +174,27 @@ class ChatFragment : Fragment() {
             reference.child(currentUserUID).child("messages").child(userDetails.uid ?: "")
                 .addValueEventListener(object : ValueEventListener {
 
-                @SuppressLint("NotifyDataSetChanged")
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    list.clear()
-                    val children = snapshot.children
-                    for (child in children) {
-                        val message = child.getValue(MyMessage::class.java)
-                        if (message != null) {
-                            list.add(message)
+                    @SuppressLint("NotifyDataSetChanged")
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        list.clear()
+                        val children = snapshot.children
+                        for (child in children) {
+                            val message = child.getValue(MyMessage::class.java)
+                            if (message != null) {
+                                list.add(message)
+                            }
                         }
+                        if (list.isEmpty()) {
+                            addShared(userDetails)
+                        }
+                        messageAdapter.notifyDataSetChanged()
+                        binding.rv.scrollToPosition(list.size - 1)
                     }
-                    messageAdapter.notifyDataSetChanged()
-                    binding.rv.scrollToPosition(list.size - 1)
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
-                }
-            })
+                    override fun onCancelled(error: DatabaseError) {
+                        Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+                    }
+                })
 
             btnBack.setOnClickListener {
                 findNavController().popBackStack()
@@ -209,5 +217,36 @@ class ChatFragment : Fragment() {
 
         binding.sendImageLayout.visibility = View.VISIBLE
         binding.sendImage.setImageURI(it)
+    }
+
+    override fun imageClick(message: MyMessage) {
+        val navOption = NavOptions.Builder()
+        navOption.setEnterAnim(R.anim.enter_anim)
+        navOption.setExitAnim(R.anim.exit_anim)
+        navOption.setPopEnterAnim(R.anim.enter_anim)
+        navOption.setPopExitAnim(R.anim.exit_anim)
+
+        findNavController().navigate(
+            R.id.imageViewFragment,
+            bundleOf("imageDetail" to message),
+            navOption.build()
+        )
+    }
+
+    private fun addShared(users: Users) {
+        MySharedPreferences.init(requireContext())
+        if (MySharedPreferences.sharedList.isNotEmpty()) {
+            for (i in MySharedPreferences.sharedList.indices) {
+                if (users.uid != MySharedPreferences.sharedList[i]) {
+                    val sharedList = MySharedPreferences.sharedList
+                    sharedList.add(users.uid!!)
+                    MySharedPreferences.sharedList = sharedList
+                }
+            }
+        } else {
+            val sharedList = MySharedPreferences.sharedList
+            sharedList.add(users.uid!!)
+            MySharedPreferences.sharedList = sharedList
+        }
     }
 }

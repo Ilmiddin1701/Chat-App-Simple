@@ -55,16 +55,17 @@
     </androidx.cardview.widget.CardView>
 
     <TextView
+        android:id="@+id/btnCreateChat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/style_2"
-        android:drawableStart="@drawable/ic_sms"
         android:drawablePadding="10dp"
         android:gravity="center"
         android:padding="15dp"
         android:text="@string/chat_boshlash"
         android:textColor="@color/black"
         android:textSize="15sp"
+        app:drawableStartCompat="@drawable/ic_sms"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintLeft_toLeftOf="parent"

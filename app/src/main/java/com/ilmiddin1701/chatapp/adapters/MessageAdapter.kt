@@ -9,7 +9,7 @@ import com.ilmiddin1701.chatapp.databinding.MessageItemSendBinding
 import com.ilmiddin1701.chatapp.models.MyMessage
 import com.squareup.picasso.Picasso
 
-class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageAdapter(var rvAction: RvAction, val list: ArrayList<MyMessage>, val currentUserUid: String): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     val TYPE_FROM = 1
     val TYPE_TO = 0
 
@@ -40,6 +40,9 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
                     isClick = false
                     receivedItem.tvDate.visibility = View.GONE
                 }
+            }
+            receivedItem.image.setOnClickListener {
+                rvAction.imageClick(message)
             }
         }
     }
@@ -72,6 +75,9 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
                     sendItem.tvDate.visibility = View.GONE
                 }
             }
+            sendItem.image.setOnClickListener {
+                rvAction.imageClick(message)
+            }
         }
     }
 
@@ -101,5 +107,9 @@ class MessageAdapter(val list: ArrayList<MyMessage>, val currentUserUid: String)
         } else {
             TYPE_TO
         }
+    }
+
+    interface RvAction {
+        fun imageClick(message: MyMessage)
     }
 }

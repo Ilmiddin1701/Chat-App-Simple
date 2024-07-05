@@ -34,7 +34,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="20sp"
-            android:text="User name"/>
+            android:text="@string/user_name"
+            android:contentDescription="@string/btn_back"/>
 
         <TextView
             android:id="@+id/email"

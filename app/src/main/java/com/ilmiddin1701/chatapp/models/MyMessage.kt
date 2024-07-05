@@ -1,6 +1,8 @@
 package com.ilmiddin1701.chatapp.models
 
-class MyMessage {
+import java.io.Serializable
+
+class MyMessage: Serializable {
     var text: String? = null
     var toUID: String? = null
     var fromUID: String? = null

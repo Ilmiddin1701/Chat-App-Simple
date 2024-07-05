@@ -139,6 +139,7 @@
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:hint="@string/matnli_xabar"
+                android:inputType="textCapSentences|textMultiLine"
                 android:lineHeight="24dp"
                 android:maxLines="4"
                 android:paddingStart="0dp"
