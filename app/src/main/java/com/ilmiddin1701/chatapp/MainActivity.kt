@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -17,18 +18,17 @@ import com.ilmiddin1701.chatapp.utils.StorageUtil.sdk24AdnUp
 import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         setContentView(R.layout.activity_main)
 
-        updateOrRequestPermission()
-        MyData.permissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts
-                .RequestMultiplePermissions()) { check ->
+        permissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()) { check ->
                 MyData.writePermissionGranted = check[Manifest.permission.WRITE_EXTERNAL_STORAGE] ?: MyData.writePermissionGranted
             }
+        updateOrRequestPermission()
     }
 
     private fun updateOrRequestPermission() {
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
             permissionToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
         if (permissionToRequest.isNotEmpty()) {
-            MyData.permissionLauncher.launch(permissionToRequest.toTypedArray())
+            permissionLauncher.launch(permissionToRequest.toTypedArray())
         }
     }
 }

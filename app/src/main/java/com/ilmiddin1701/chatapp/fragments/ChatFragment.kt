@@ -35,24 +35,27 @@ import java.util.Date
 class ChatFragment : Fragment(), MessageAdapter.RvAction {
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
 
-    private lateinit var firebaseDatabase: FirebaseDatabase
+    //realtime database
     private lateinit var reference: DatabaseReference
+    private lateinit var firebaseDatabase: FirebaseDatabase
 
+    //cloud storage
     private lateinit var firebaseStorage: FirebaseStorage
     private lateinit var storageReference: StorageReference
 
     private lateinit var currentUserUID: String
-    private lateinit var list: ArrayList<MyMessage>
     private lateinit var messageAdapter: MessageAdapter
+
+    private var imgURL = ""
+    private var uri: Uri? = null
+    private lateinit var list: ArrayList<MyMessage>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         requireActivity().window.statusBarColor = Color.parseColor("#1B2026")
-        val media = MediaPlayer.create(context, R.raw.sound_send)
 
-        list = ArrayList()
         currentUserUID = arguments?.getString("currentUserUID").toString()
         val userDetails = arguments?.getSerializable("keyUser") as Users
 
@@ -62,6 +65,7 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
         firebaseStorage = FirebaseStorage.getInstance()
         storageReference = firebaseStorage.getReference("images")
 
+        list = ArrayList()
         binding.title.text = userDetails.name
         val toUserPhotoUrl = userDetails.photoUrl
         Picasso.get().load(toUserPhotoUrl).into(binding.userImage)
@@ -72,95 +76,48 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
             btnSend.setOnClickListener {
                 val text = edtMessage.text.toString()
                 if (uri != null && text.isNotBlank()) {
+                    function1()
                     val m = System.currentTimeMillis()
                     val task = storageReference.child(m.toString()).putFile(uri!!)
-                    btnX.isEnabled = false
-                    btnSend.isEnabled = false
-                    edtMessage.isEnabled = false
-                    progress.visibility = View.VISIBLE
-
                     task.addOnSuccessListener {
                         if (it.task.isSuccessful) {
                             val downloadURL = it.metadata?.reference?.downloadUrl
                             downloadURL?.addOnSuccessListener { imageURL ->
                                 imgURL = imageURL.toString()
                                 val message = MyMessage(text, userDetails.uid, currentUserUID, imgURL, getDate())
-                                val key = reference.push().key!!
-
-                                reference.child(userDetails.uid!!).child("messages")
-                                    .child(currentUserUID)
-                                    .child(key).setValue(message)
-
-                                reference.child(currentUserUID).child("messages")
-                                    .child(userDetails.uid!!)
-                                    .child(key).setValue(message)
-
-                                uri = null
-                                media.start()
-                                btnX.isEnabled = true
-                                btnSend.isEnabled = true
-                                edtMessage.isEnabled = true
-                                binding.edtMessage.text.clear()
-                                progress.visibility = View.GONE
-                                sendImageLayout.visibility = View.GONE
+                                function2(userDetails, message)
                             }
                         }
                     }
                     task.addOnFailureListener {
-                        Toast.makeText(context, "Error " + it.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Error ${it.message}", Toast.LENGTH_SHORT).show()
                     }
                 } else if (uri == null && text.isNotBlank()) {
                     val message = MyMessage(text, userDetails.uid, currentUserUID, getDate())
-                    val key = reference.push().key!!
-
-                    reference.child(userDetails.uid!!).child("messages").child(currentUserUID)
-                        .child(key).setValue(message)
-
-                    reference.child(currentUserUID).child("messages").child(userDetails.uid!!)
-                        .child(key).setValue(message)
-
-                    media.start()
-                    binding.edtMessage.text.clear()
+                    function2(userDetails, message)
 
                 } else if (uri != null && text.isBlank()) {
+                    function1()
                     val m = System.currentTimeMillis()
                     val task = storageReference.child(m.toString()).putFile(uri!!)
-                    btnX.isEnabled = false
-                    btnSend.isEnabled = false
-                    edtMessage.isEnabled = false
-                    progress.visibility = View.VISIBLE
-
                     task.addOnSuccessListener {
                         if (it.task.isSuccessful) {
                             val downloadURL = it.metadata?.reference?.downloadUrl
                             downloadURL?.addOnSuccessListener { imageURL ->
                                 imgURL = imageURL.toString()
                                 val message = MyMessage("", userDetails.uid, currentUserUID, imgURL, getDate())
-                                val key = reference.push().key!!
-
-                                reference.child(userDetails.uid!!).child("messages")
-                                    .child(currentUserUID)
-                                    .child(key).setValue(message)
-
-                                reference.child(currentUserUID).child("messages")
-                                    .child(userDetails.uid!!)
-                                    .child(key).setValue(message)
-
-                                uri = null
-                                media.start()
-                                btnX.isEnabled = true
-                                btnSend.isEnabled = true
-                                edtMessage.isEnabled = true
-                                binding.edtMessage.text.clear()
-                                progress.visibility = View.GONE
-                                sendImageLayout.visibility = View.GONE
+                                function2(userDetails, message)
                             }
                         }
                     }
                     task.addOnFailureListener {
-                        Toast.makeText(context, "Error " + it.message, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Error ${it.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
+            }
+
+            btnBack.setOnClickListener {
+                findNavController().popBackStack()
             }
 
             btnAttach.setOnClickListener {
@@ -172,9 +129,9 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                 sendImageLayout.visibility = View.GONE
             }
 
+            MySharedPreferences.init(requireContext())
             reference.child(currentUserUID).child("messages").child(userDetails.uid ?: "")
                 .addValueEventListener(object : ValueEventListener {
-
                     @SuppressLint("NotifyDataSetChanged")
                     override fun onDataChange(snapshot: DataSnapshot) {
                         list.clear()
@@ -185,8 +142,6 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                                 list.add(message)
                             }
                         }
-
-                        MySharedPreferences.init(requireContext())
                         if (list.isNotEmpty() && userDetails.uid !in MySharedPreferences.sharedList) {
                             val sharedList = MySharedPreferences.sharedList
                             sharedList.add(userDetails.uid!!)
@@ -200,10 +155,6 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                         Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
                     }
                 })
-
-            btnBack.setOnClickListener {
-                findNavController().popBackStack()
-            }
         }
         return binding.root
     }
@@ -215,12 +166,9 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
         return simpleDateFormat.format(date)
     }
 
-    var imgURL = ""
-    var uri: Uri? = null
     private val getImageContent = registerForActivityResult(ActivityResultContracts.GetContent()) {
         it ?: return@registerForActivityResult
         uri = it
-
         binding.sendImageLayout.visibility = View.VISIBLE
         binding.sendImage.setImageURI(it)
     }
@@ -237,5 +185,31 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
             bundleOf("imageDetail" to message),
             navOption.build()
         )
+    }
+
+    private fun function1() {
+        binding.btnX.isEnabled = false
+        binding.btnSend.isEnabled = false
+        binding.edtMessage.isEnabled = false
+        binding.progress.visibility = View.VISIBLE
+    }
+
+    private fun function2(users: Users, message: MyMessage) {
+        val media = MediaPlayer.create(context, R.raw.sound_send)
+        val key = reference.push().key!!
+        reference.child(users.uid!!).child("messages").child(currentUserUID)
+            .child(key).setValue(message)
+
+        reference.child(currentUserUID).child("messages").child(users.uid!!)
+            .child(key).setValue(message)
+
+        uri = null
+        media.start()
+        binding.btnX.isEnabled = true
+        binding.btnSend.isEnabled = true
+        binding.edtMessage.isEnabled = true
+        binding.edtMessage.text.clear()
+        binding.progress.visibility = View.GONE
+        binding.sendImageLayout.visibility = View.GONE
     }
 }

@@ -85,9 +85,8 @@ class CreateNewChatFragment : Fragment(), UsersAdapter.RvAction {
 
     override fun onClick(users: Users) {
         findNavController().popBackStack()
-        findNavController().navigate(
-            R.id.chatFragment,
-            bundleOf("keyUser" to users, "currentUserUID" to auth.uid.toString(), "currentUserPhotoUrl" to auth.currentUser?.photoUrl.toString())
+        findNavController().navigate(R.id.chatFragment,
+            bundleOf("keyUser" to users, "currentUserUID" to auth.uid.toString())
         )
     }
 
