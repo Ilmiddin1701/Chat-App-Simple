@@ -24,7 +24,6 @@ import com.ilmiddin1701.chatapp.R
 import com.ilmiddin1701.chatapp.adapters.UsersAdapter
 import com.ilmiddin1701.chatapp.databinding.FragmentHomeBinding
 import com.ilmiddin1701.chatapp.models.Users
-import com.ilmiddin1701.chatapp.utils.MyData
 import com.ilmiddin1701.chatapp.utils.MySharedPreferences
 import com.squareup.picasso.Picasso
 

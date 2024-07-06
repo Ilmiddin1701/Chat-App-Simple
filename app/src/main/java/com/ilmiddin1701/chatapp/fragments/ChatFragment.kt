@@ -73,6 +73,14 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
         binding.rv.adapter = messageAdapter
 
         binding.apply {
+            btnBack.setOnClickListener { findNavController().popBackStack() }
+            btnAttach.setOnClickListener { getImageContent.launch("image/*") }
+
+            btnX.setOnClickListener {
+                uri = null
+                sendImageLayout.visibility = View.GONE
+            }
+
             btnSend.setOnClickListener {
                 val text = edtMessage.text.toString()
                 if (uri != null && text.isNotBlank()) {
@@ -114,19 +122,6 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                         Toast.makeText(context, "Error ${it.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
-            }
-
-            btnBack.setOnClickListener {
-                findNavController().popBackStack()
-            }
-
-            btnAttach.setOnClickListener {
-                getImageContent.launch("image/*")
-            }
-
-            btnX.setOnClickListener {
-                uri = null
-                sendImageLayout.visibility = View.GONE
             }
 
             MySharedPreferences.init(requireContext())
