@@ -85,11 +85,7 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
         return binding.root
     }
 
-    override fun onCreateContextMenu(
-        menu: ContextMenu,
-        v: View,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         requireActivity().menuInflater.inflate(R.menu.my_menu, menu)
     }
@@ -99,6 +95,10 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
             R.id.menu_logOut -> {
                 googleSignInClient.signOut()
                 auth.signOut()
+                MySharedPreferences.init(requireContext())
+                val sharedList = MySharedPreferences.sharedList
+                sharedList.clear()
+                MySharedPreferences.sharedList = sharedList
                 findNavController().popBackStack()
                 findNavController().navigate(R.id.signInFragment)
             }

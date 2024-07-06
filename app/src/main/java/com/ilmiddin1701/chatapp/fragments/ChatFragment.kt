@@ -185,21 +185,12 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                                 list.add(message)
                             }
                         }
-                        if (list.isNotEmpty()) {
-                            MySharedPreferences.init(requireContext())
-                            if (MySharedPreferences.sharedList.isNotEmpty()) {
-                                for (i in MySharedPreferences.sharedList) {
-                                    if (userDetails.uid != i) {
-                                        val sharedList = MySharedPreferences.sharedList
-                                        sharedList.add(userDetails.uid!!)
-                                        MySharedPreferences.sharedList = sharedList
-                                    }
-                                }
-                            } else {
-                                val sharedList = MySharedPreferences.sharedList
-                                sharedList.add(userDetails.uid!!)
-                                MySharedPreferences.sharedList = sharedList
-                            }
+
+                        MySharedPreferences.init(requireContext())
+                        if (list.isNotEmpty() && userDetails.uid !in MySharedPreferences.sharedList) {
+                            val sharedList = MySharedPreferences.sharedList
+                            sharedList.add(userDetails.uid!!)
+                            MySharedPreferences.sharedList = sharedList
                         }
                         messageAdapter.notifyDataSetChanged()
                         binding.rv.scrollToPosition(list.size - 1)
