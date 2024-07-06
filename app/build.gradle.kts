@@ -11,6 +11,7 @@ android {
     defaultConfig {
         applicationId = "com.ilmiddin1701.chatapp"
         minSdk = 24
+        //noinspection OldTargetApi
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
