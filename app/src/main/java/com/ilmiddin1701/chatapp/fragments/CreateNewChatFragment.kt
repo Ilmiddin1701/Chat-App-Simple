@@ -1,11 +1,13 @@
 package com.ilmiddin1701.chatapp.fragments
 
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
@@ -89,5 +91,16 @@ class CreateNewChatFragment : Fragment(), UsersAdapter.RvAction {
             R.id.chatFragment,
             bundleOf("keyUser" to users, "currentUserUID" to auth.uid.toString(), "currentUserPhotoUrl" to auth.currentUser?.photoUrl.toString())
         )
+    }
+
+    private fun showKeyboard(view: View) {
+        view.requestFocus()
+        val imm = requireActivity().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        showKeyboard(binding.edtSearch)
     }
 }

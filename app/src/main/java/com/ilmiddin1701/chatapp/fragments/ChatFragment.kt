@@ -184,7 +184,7 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                                 list.add(message)
                             }
                         }
-                        if (list.isEmpty()) {
+                        if (list.isNotEmpty()) {
                             addShared(userDetails)
                         }
                         messageAdapter.notifyDataSetChanged()
