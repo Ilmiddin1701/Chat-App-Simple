@@ -65,15 +65,13 @@ class HomeFragment : Fragment(), UsersAdapter.RvAction {
             Picasso.get().load(auth.currentUser?.photoUrl).into(binding.btnUser)
             reference.addValueEventListener(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    val sharedList = MySharedPreferences.sharedList
                     rvList = ArrayList()
                     val children = snapshot.children
+                    val sharedList = MySharedPreferences.sharedList
                     for (child in children) {
                         val user = child.getValue(Users::class.java)
-                        for (i in sharedList.indices) {
-                            if (user?.uid == sharedList[i]) {
-                                rvList.add(user)
-                            }
+                        if (sharedList.isNotEmpty() && user?.uid in sharedList) {
+                            rvList.add(user!!)
                         }
                     }
                     rv.adapter = UsersAdapter(this@HomeFragment, rvList)

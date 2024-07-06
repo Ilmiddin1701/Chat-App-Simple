@@ -186,7 +186,20 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
                             }
                         }
                         if (list.isNotEmpty()) {
-                            addShared(userDetails)
+                            MySharedPreferences.init(requireContext())
+                            if (MySharedPreferences.sharedList.isNotEmpty()) {
+                                for (i in MySharedPreferences.sharedList) {
+                                    if (userDetails.uid != i) {
+                                        val sharedList = MySharedPreferences.sharedList
+                                        sharedList.add(userDetails.uid!!)
+                                        MySharedPreferences.sharedList = sharedList
+                                    }
+                                }
+                            } else {
+                                val sharedList = MySharedPreferences.sharedList
+                                sharedList.add(userDetails.uid!!)
+                                MySharedPreferences.sharedList = sharedList
+                            }
                         }
                         messageAdapter.notifyDataSetChanged()
                         binding.rv.scrollToPosition(list.size - 1)
@@ -233,22 +246,5 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
             bundleOf("imageDetail" to message),
             navOption.build()
         )
-    }
-
-    private fun addShared(users: Users) {
-        MySharedPreferences.init(requireContext())
-        if (MySharedPreferences.sharedList.isNotEmpty()) {
-            for (i in MySharedPreferences.sharedList.indices) {
-                if (users.uid != MySharedPreferences.sharedList[i]) {
-                    val sharedList = MySharedPreferences.sharedList
-                    sharedList.add(users.uid!!)
-                    MySharedPreferences.sharedList = sharedList
-                }
-            }
-        } else {
-            val sharedList = MySharedPreferences.sharedList
-            sharedList.add(users.uid!!)
-            MySharedPreferences.sharedList = sharedList
-        }
     }
 }
