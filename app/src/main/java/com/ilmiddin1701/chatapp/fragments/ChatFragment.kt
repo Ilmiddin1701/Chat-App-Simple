@@ -31,6 +31,7 @@ import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.Date
 
+@Suppress("DEPRECATION")
 class ChatFragment : Fragment(), MessageAdapter.RvAction {
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
 
@@ -203,6 +204,7 @@ class ChatFragment : Fragment(), MessageAdapter.RvAction {
         return binding.root
     }
 
+    @SuppressLint("SimpleDateFormat")
     private fun getDate(): String {
         val date = Date()
         val simpleDateFormat = SimpleDateFormat("HH:mm\ndd.MM.yyyy")

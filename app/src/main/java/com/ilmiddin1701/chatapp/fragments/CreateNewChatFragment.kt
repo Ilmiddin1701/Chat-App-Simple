@@ -3,7 +3,6 @@ package com.ilmiddin1701.chatapp.fragments
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +10,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -25,8 +25,6 @@ import com.ilmiddin1701.chatapp.R
 import com.ilmiddin1701.chatapp.adapters.UsersAdapter
 import com.ilmiddin1701.chatapp.databinding.FragmentCreateNewChatBinding
 import com.ilmiddin1701.chatapp.models.Users
-import com.ilmiddin1701.chatapp.utils.MySharedPreferences
-import com.squareup.picasso.Picasso
 
 class CreateNewChatFragment : Fragment(), UsersAdapter.RvAction {
     private val binding by lazy { FragmentCreateNewChatBinding.inflate(layoutInflater) }
